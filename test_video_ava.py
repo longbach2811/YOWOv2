@@ -46,25 +46,22 @@ def parse_args():
 @torch.no_grad()
 def run(args, d_cfg, model, device, transform, class_names):
     # path to save 
-    save_path = os.path.join(args.save_folder, 'ava_video')
-    os.makedirs(save_path, exist_ok=True)
+    # save_path = os.path.join(args.save_folder, 'ava_video')
+    # os.makedirs(save_path, exist_ok=True)
 
     # path to video
-    path_to_video = os.path.join(d_cfg['data_root'], 'videos_15min', args.video)
-
+    video = cv2.VideoCapture(args.video)
+    frame_width = int(video.get(3))
+    frame_height = int(video.get(4))
+    out = cv2.VideoWriter('output.avi',cv2.VideoWriter_fourcc(*'DIVX'), 10, (frame_width,frame_height))
     # video
-    video = cv2.VideoCapture(path_to_video)
-    fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    save_size = (640, 480)
-    save_name = os.path.join(save_path, 'detection.avi')
-    fps = 15.0
-    out = cv2.VideoWriter(save_name, fourcc, fps, save_size)
+    
 
     video_clip = []
-    while(True):
+    while(video.isOpened()):
         ret, frame = video.read()
         
-        if ret:
+        if ret==True:
             # to PIL image
             frame_pil = Image.fromarray(frame.astype(np.uint8))
 
@@ -97,7 +94,7 @@ def run(args, d_cfg, model, device, transform, class_names):
             for bbox in bboxes:
                 x1, y1, x2, y2 = bbox[:4]
                 det_conf = float(bbox[4])
-                cls_out = [det_conf * cls_conf.cpu().numpy() for cls_conf in bbox[5]]
+                cls_out = [det_conf * cls_conf for cls_conf in bbox[5:]]
             
                 # rescale bbox
                 x1, x2 = int(x1 * orig_w), int(x2 * orig_w)
@@ -175,9 +172,11 @@ if __name__ == '__main__':
         num_classes=num_classes, 
         trainable=False
         )
+    
+    print('Model type', type(model))
 
     # load trained weight
-    model = load_weight(model=model, path_to_ckpt=args.weight)
+    model = load_weight(model=model[0], path_to_ckpt=args.weight)
 
     # to eval
     model = model.to(device).eval()

@@ -1,0 +1,1 @@
+python test_video_ava.py -d ava_v2.2 -v yowo_v2_large --weight yowo_v2_large_ava_k32.pth --video cam1_sync.mov --show
