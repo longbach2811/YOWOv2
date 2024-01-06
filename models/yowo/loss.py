@@ -34,7 +34,7 @@ class SigmoidFocalLoss(object):
 
 
 class Criterion(object):
-    def __init__(self, args, img_size, num_classes=80, multi_hot=False):
+    def __init__(self, args, img_size, num_classes=5, multi_hot=False):
         self.num_classes = num_classes
         self.img_size = img_size
         self.loss_conf_weight = args.loss_conf_weight
@@ -73,6 +73,8 @@ class Criterion(object):
         cls_preds = torch.cat(outputs['pred_cls'], dim=1)
         box_preds = torch.cat(outputs['pred_box'], dim=1)
 
+        print('conf, cls, box', conf_preds, cls_preds, box_preds)
+
         # label assignment
         cls_targets = []
         box_targets = []
@@ -83,11 +85,13 @@ class Criterion(object):
             tgt_labels = targets[batch_idx]["labels"].to(device)
             tgt_bboxes = targets[batch_idx]["boxes"].to(device)
 
+            # print('bs', tgt_labels, tgt_bboxes)
             # denormalize tgt_bbox
             tgt_bboxes *= self.img_size
 
             # check target
             if len(tgt_labels) == 0 or tgt_bboxes.max().item() == 0.:
+                # print("DEBUG1: ")
                 num_anchors = sum([ab.shape[0] for ab in anchors])
                 # There is no valid gt
                 cls_target = conf_preds.new_zeros((0, self.num_classes))
@@ -95,6 +99,7 @@ class Criterion(object):
                 conf_target = conf_preds.new_zeros((num_anchors, 1))
                 fg_mask = conf_preds.new_zeros(num_anchors).bool()
             else:
+                # print("DEBUG2:" )
                 (
                     gt_matched_classes,
                     fg_mask,
@@ -118,6 +123,7 @@ class Criterion(object):
                 else:
                     cls_target = F.one_hot(gt_matched_classes.long(), self.num_classes)
                 cls_target = cls_target * pred_ious_this_matching.unsqueeze(-1)
+                
 
             cls_targets.append(cls_target)
             box_targets.append(box_target)

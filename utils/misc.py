@@ -5,8 +5,10 @@ import torch.nn as nn
 
 from dataset.ucf_jhmdb import UCF_JHMDB_Dataset
 from dataset.ava import AVA_Dataset
+from dataset.custom_dataset import Custom_Dataset
 from dataset.transforms import Augmentation, BaseTransform
 
+from evaluator.custom_dataset_evaluator import CustomDataset_Evaluator
 from evaluator.ucf_jhmdb_evaluator import UCF_JHMDB_Evaluator
 from evaluator.ava_evaluator import AVA_Evaluator
 
@@ -88,6 +90,37 @@ def build_dataset(d_cfg, args, is_train=False):
             full_test_on_val=False,
             version='v2.2'
             )
+        
+    elif args.dataset == 'custom':
+        data_dir = '/home/longbach/Desktop/motion-det-dataset/processed_data_v3'
+        dataset = Custom_Dataset(
+            data_root=data_dir,
+            dataset=args.dataset,
+            img_size=d_cfg['train_size'],
+            transform=augmentation,
+            is_train=is_train,
+            len_clip=args.len_clip,
+            sampling_rate=d_cfg['sampling_rate']
+            )
+        num_classes = 5
+
+        # evaluator
+        evaluator = CustomDataset_Evaluator(
+            data_root=data_dir,
+            dataset=args.dataset,
+            model_name=args.version,
+            metric='vmap',
+            img_size=d_cfg['test_size'],
+            len_clip=args.len_clip,
+            batch_size=args.test_batch_size,
+            conf_thresh=0.01,
+            iou_thresh=0.5,
+            gt_folder=d_cfg['gt_folder'],
+            save_path='./evaluator/eval_results/',
+            transform=basetransform,
+            collate_fn=CollateFunc()            
+        )
+
 
     else:
         print('unknow dataset !! Only support ucf24 & jhmdb21 & ava_v2.2 !!')

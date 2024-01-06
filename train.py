@@ -75,7 +75,7 @@ def parse_args():
                         help='confidence threshold. We suggest 0.005 for UCF24 and 0.1 for AVA.')
     parser.add_argument('-nt', '--nms_thresh', default=0.5, type=float,
                         help='NMS threshold. We suggest 0.5 for UCF24 and AVA.')
-    parser.add_argument('--topk', default=40, type=int,
+    parser.add_argument('--topk', default=5, type=int,
                         help='topk prediction candidates.')
     parser.add_argument('-K', '--len_clip', default=16, type=int,
                         help='video clip length.')
@@ -88,7 +88,7 @@ def parse_args():
 
     # Dataset
     parser.add_argument('-d', '--dataset', default='ucf24',
-                        help='ucf24, ava_v2.2')
+                        help='ucf24, ava_v2.2, custom')
     parser.add_argument('--root', default='/mnt/share/ssd2/dataset/STAD/',
                         help='data root')
     parser.add_argument('--num_workers', default=4, type=int, 
@@ -147,6 +147,8 @@ def train():
         device = torch.device("cuda")
     else:
         device = torch.device("cpu")
+
+    print("DEVICE: ", device)
 
     # config
     d_cfg = build_dataset_config(args)
@@ -238,6 +240,7 @@ def train():
             # inference
             outputs = model(video_clips)
             
+            print("Outputs:", outputs)
             # loss
             loss_dict = criterion(outputs, targets)
             losses = loss_dict['losses']

@@ -29,6 +29,8 @@ class SimOTA(object):
         num_anchor = anchors.shape[0]        
         num_gt = len(tgt_labels)
 
+        # print("pred_conf", pred_conf)
+
         # positive candidates
         fg_mask, is_in_boxes_and_center = \
             self.get_in_boxes_info(
@@ -44,9 +46,12 @@ class SimOTA(object):
         box_preds_ = pred_box[fg_mask]   # [Mp, 4]
         num_in_boxes_anchor = box_preds_.shape[0]
 
+        # print('DEBUG', conf_preds_, cls_preds_, box_preds_, num_in_boxes_anchor)
+
         # [N, Mp]
         pair_wise_ious, _ = box_iou(tgt_bboxes, box_preds_)
         pair_wise_ious_loss = -torch.log(pair_wise_ious + 1e-8)
+
 
         if len(tgt_labels.shape) == 1:
             gt_cls = F.one_hot(tgt_labels.long(), self.num_classes)
@@ -173,7 +178,11 @@ class SimOTA(object):
         topk_ious, _ = torch.topk(ious_in_boxes_matrix, n_candidate_k, dim=1)
         dynamic_ks = torch.clamp(topk_ious.sum(1).int(), min=1)
         dynamic_ks = dynamic_ks.tolist()
+        # print("dynamic:", dynamic_ks)
+        # print("num_gt", num_gt)
         for gt_idx in range(num_gt):
+            # print("cost[idx]: ", cost[gt_idx])
+            # print("k:", dynamic_ks[gt_idx])
             _, pos_idx = torch.topk(
                 cost[gt_idx], k=dynamic_ks[gt_idx], largest=False
             )

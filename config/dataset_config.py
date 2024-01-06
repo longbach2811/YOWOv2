@@ -56,6 +56,55 @@ dataset_config = {
                 ),
     },
     
+    'custom': {
+        'data_root':  '/home/longbach/Desktop/motion-det-dataset/processed_data_v3',
+        # 'data_root': 'D:/python_work/spatial-temporal_action_detection/dataset/ucf24',
+        'gt_folder': '/home/longbach/Desktop/motion-det-dataset/processed_data_v3/labels',
+        # input size
+        'train_size': 224,
+        'test_size': 224,
+        # transform
+        'pixel_mean': [0., 0., 0.],
+        'pixel_std': [1., 1., 1.],
+        'jitter': 0.2,
+        'hue': 0.1,
+        'saturation': 1.5,
+        'exposure': 1.5,
+        'sampling_rate': 1,
+        'len_clip': 16,
+        # cls label
+        'multi_hot': False,  # one hot
+        # post process
+        'conf_thresh': 0.3,
+        'nms_thresh': 0.5,
+        'conf_thresh_val': 0.005,
+        'nms_thresh_val': 0.5,
+        # freeze backbone
+        'freeze_backbone_2d': False,
+        'freeze_backbone_3d': False,
+        # train config
+        'batch_size': 8,
+        'test_batch_size': 8,
+        'accumulate': 16,
+        'optimizer': 'adamw',
+        'momentum': 0.9,
+        'weight_decay': 5e-4,
+        'max_epoch': 5,
+        'lr_epoch': [1, 2, 3, 4],
+        'base_lr': 1e-4,
+        'lr_decay_ratio': 0.5,
+        # warmup strategy
+        'warmup': 'linear',
+        'warmup_factor': 0.00066667,
+        'wp_iter': 500,
+        # class names
+        'valid_num_classes': 24,
+        'label_map': (
+                    "stand", "walk", "open door", "take (an object)", "fall"
+                ),
+
+    },
+    
     'jhmdb21': {
         # dataset
         'data_root': '/mnt/share/ssd2/dataset/STAD/jhmdb21',
