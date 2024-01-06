@@ -240,7 +240,7 @@ def train():
             # inference
             outputs = model(video_clips)
             
-            print("Outputs:", outputs)
+            # print("Outputs:", outputs)
             # loss
             loss_dict = criterion(outputs, targets)
             losses = loss_dict['losses']

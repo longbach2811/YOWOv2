@@ -73,7 +73,7 @@ class Criterion(object):
         cls_preds = torch.cat(outputs['pred_cls'], dim=1)
         box_preds = torch.cat(outputs['pred_box'], dim=1)
 
-        print('conf, cls, box', conf_preds, cls_preds, box_preds)
+        # print('conf, cls, box', conf_preds, cls_preds, box_preds)
 
         # label assignment
         cls_targets = []
