@@ -1,4 +1,5 @@
 python train.py \
+        -cuda \
         -d custom \
         -v yowo_v2_large \
         --root /home/longbach/Desktop/motion-det-dataset/processed_data_v3 \
