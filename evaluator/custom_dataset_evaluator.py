@@ -10,20 +10,20 @@ from .cal_frame_mAP import evaluate_frameAP
 from .cal_video_mAP import evaluate_videoAP
 
 class CustomDataset_Evaluator(object):
-       def __init__(self,
-                 data_root=None,
-                 dataset='custom',
-                 model_name='yowo',
-                 metric='vmap',
-                 img_size=224,
-                 len_clip=1,
-                 batch_size=1,
-                 conf_thresh=0.01,
-                 iou_thresh=0.5,
-                 transform=None,
-                 collate_fn=None,
-                 gt_folder=None,
-                 save_path=None):
+    def __init__(self,
+                data_root=None,
+                dataset='custom',
+                model_name='yowo',
+                metric='vmap',
+                img_size=224,
+                len_clip=1,
+                batch_size=1,
+                conf_thresh=0.01,
+                iou_thresh=0.5,
+                transform=None,
+                collate_fn=None,
+                gt_folder=None,
+                save_path=None):
         self.data_root = data_root
         self.dataset = dataset
         self.model_name = model_name
@@ -58,179 +58,179 @@ class CustomDataset_Evaluator(object):
                 sampling_rate=1)
             self.num_classes = self.testset.num_classes
 
-def evaluate_frame_map(self, model, epoch=1, show_pr_curve=False):
-    print("Metric: Frame mAP")
-    # dataloader
-    self.testloader = torch.utils.data.DataLoader(
-        dataset=self.testset, 
-        batch_size=self.batch_size,
-        shuffle=False,
-        collate_fn=self.collate_fn, 
-        num_workers=4,
-        drop_last=False,
-        pin_memory=True
-        )
-    epoch_size = len(self.testloader)
-
-    # inference
-    for iter_i, (batch_frame_id, batch_video_clip, batch_target) in enumerate(self.testloader):
-        # to device
-        batch_video_clip = batch_video_clip.to(model.device)
-
-        with torch.no_grad():
-            # inference
-            batch_scores, batch_labels, batch_bboxes = model(batch_video_clip)
-
-            # process batch
-            for bi in range(len(batch_scores)):
-                frame_id = batch_frame_id[bi]
-                scores = batch_scores[bi]
-                labels = batch_labels[bi]
-                bboxes = batch_bboxes[bi]
-                target = batch_target[bi]
-
-                # rescale bbox
-                orig_size = target['orig_size']
-                bboxes = rescale_bboxes(bboxes, orig_size)
-
-                if not os.path.exists('results'):
-                    os.mkdir('results')
-
-                if self.dataset == 'custom':
-                    detection_path = os.path.join('results', 'custom_detections', self.model_name, 'detections_' + str(epoch), frame_id)
-                    current_dir = os.path.join('results', 'custom_detections',  self.model_name, 'detections_' + str(epoch))
-                    if not os.path.exists('results/custom_detections/'):
-                        os.mkdir('results/custom_detections/')
-                    if not os.path.exists('results/custom_detections/'+self.model_name):
-                        os.mkdir('results/custom_detections/'+self.model_name)
-                    if not os.path.exists(current_dir):
-                        os.mkdir(current_dir)
-
-                with open(detection_path, 'w+') as f_detect:
-                    for score, label, bbox in zip(scores, labels, bboxes):
-                        x = round(bbox[0])
-                        y = round(bbox[1])
-                        w = round(bbox[2])
-                        h = round(bbox[3])
-                        cls_id = int(label) + 1
-
-                        f_detect.write(
-                            str(cls_id) + ' ' + str(score) + ' ' \
-                                + str(x) + ' ' + str(y) + ' ' + str(w) + ' ' + str(h) + '\n')
-
-            if iter_i % 100 == 0:
-                log_info = "[%d / %d]" % (iter_i, epoch_size)
-                print(log_info, flush=True)
-
-    print('calculating Frame mAP ...')
-    metric_list = evaluate_frameAP(self.gt_folder, current_dir, self.iou_thresh,
-                            self.save_path, self.dataset, show_pr_curve)
-    for metric in metric_list:
-        print(metric)
-
-def evaluate_video_map(self, model):
-        print("Metric: Video mAP")
-        video_testlist = []
-        with open(self.testlist, 'r') as file:
-            lines = file.readlines()
-            for line in lines:
-                line = line.rstrip()
-                video_testlist.append(line)
-
-        detected_boxes = {}
-        gt_videos = {}
-
-        gt_data = loadmat(self.gt_file)['annot']
-        n_videos = gt_data.shape[1]
-        print('loading gt tubes ...')
-        for i in range(n_videos):
-            video_name = gt_data[0][i][1][0]
-            if video_name in video_testlist:
-                n_tubes = len(gt_data[0][i][2][0])
-                v_annotation = {}
-                all_gt_boxes = []
-                for j in range(n_tubes):  
-                    gt_one_tube = [] 
-                    tube_start_frame = gt_data[0][i][2][0][j][1][0][0]
-                    tube_end_frame = gt_data[0][i][2][0][j][0][0][0]
-                    tube_class = gt_data[0][i][2][0][j][2][0][0]
-                    tube_data = gt_data[0][i][2][0][j][3]
-                    tube_length = tube_end_frame - tube_start_frame + 1
-                
-                    for k in range(tube_length):
-                        gt_boxes = []
-                        gt_boxes.append(int(tube_start_frame+k))
-                        gt_boxes.append(float(tube_data[k][0]))
-                        gt_boxes.append(float(tube_data[k][1]))
-                        gt_boxes.append(float(tube_data[k][0]) + float(tube_data[k][2]))
-                        gt_boxes.append(float(tube_data[k][1]) + float(tube_data[k][3]))
-                        gt_one_tube.append(gt_boxes)
-                    all_gt_boxes.append(gt_one_tube)
-
-                v_annotation['gt_classes'] = tube_class
-                v_annotation['tubes'] = np.array(all_gt_boxes)
-                gt_videos[video_name] = v_annotation
+    def evaluate_frame_map(self, model, epoch=1, show_pr_curve=False):
+        print("Metric: Frame mAP")
+        # dataloader
+        self.testloader = torch.utils.data.DataLoader(
+            dataset=self.testset, 
+            batch_size=self.batch_size,
+            shuffle=False,
+            collate_fn=self.collate_fn, 
+            num_workers=4,
+            drop_last=False,
+            pin_memory=True
+            )
+        epoch_size = len(self.testloader)
 
         # inference
-        print('inference ...')
-        for i, line in enumerate(lines):
-            line = line.rstrip()
-            if i % 50 == 0:
-                print('Video: [%d / %d] - %s' % (i, len(lines), line))
-            
-            # set video
-            self.testset.set_video_data(line)
+        for iter_i, (batch_frame_id, batch_video_clip, batch_target) in enumerate(self.testloader):
+            # to device
+            batch_video_clip = batch_video_clip.to(model.device)
 
-            # dataloader
-            self.testloader = torch.utils.data.DataLoader(
-                dataset=self.testset, 
-                batch_size=self.batch_size,
-                shuffle=False,
-                collate_fn=self.collate_fn, 
-                num_workers=4,
-                drop_last=False,
-                pin_memory=True
-                )
+            with torch.no_grad():
+                # inference
+                batch_scores, batch_labels, batch_bboxes = model(batch_video_clip)
+
+                # process batch
+                for bi in range(len(batch_scores)):
+                    frame_id = batch_frame_id[bi]
+                    scores = batch_scores[bi]
+                    labels = batch_labels[bi]
+                    bboxes = batch_bboxes[bi]
+                    target = batch_target[bi]
+
+                    # rescale bbox
+                    orig_size = target['orig_size']
+                    bboxes = rescale_bboxes(bboxes, orig_size)
+
+                    if not os.path.exists('results'):
+                        os.mkdir('results')
+
+                    if self.dataset == 'custom':
+                        detection_path = os.path.join('results', 'custom_detections', self.model_name, 'detections_' + str(epoch), frame_id)
+                        current_dir = os.path.join('results', 'custom_detections',  self.model_name, 'detections_' + str(epoch))
+                        if not os.path.exists('results/custom_detections/'):
+                            os.mkdir('results/custom_detections/')
+                        if not os.path.exists('results/custom_detections/'+self.model_name):
+                            os.mkdir('results/custom_detections/'+self.model_name)
+                        if not os.path.exists(current_dir):
+                            os.mkdir(current_dir)
+
+                    with open(detection_path, 'w+') as f_detect:
+                        for score, label, bbox in zip(scores, labels, bboxes):
+                            x = round(bbox[0])
+                            y = round(bbox[1])
+                            w = round(bbox[2])
+                            h = round(bbox[3])
+                            cls_id = int(label) + 1
+
+                            f_detect.write(
+                                str(cls_id) + ' ' + str(score) + ' ' \
+                                    + str(x) + ' ' + str(y) + ' ' + str(w) + ' ' + str(h) + '\n')
+
+                if iter_i % 100 == 0:
+                    log_info = "[%d / %d]" % (iter_i, epoch_size)
+                    print(log_info, flush=True)
+
+        print('calculating Frame mAP ...')
+        metric_list = evaluate_frameAP(self.gt_folder, current_dir, self.iou_thresh,
+                                self.save_path, self.dataset, show_pr_curve)
+        for metric in metric_list:
+            print(metric)
+
+    def evaluate_video_map(self, model):
+            print("Metric: Video mAP")
+            video_testlist = []
+            with open(self.testlist, 'r') as file:
+                lines = file.readlines()
+                for line in lines:
+                    line = line.rstrip()
+                    video_testlist.append(line)
+
+            detected_boxes = {}
+            gt_videos = {}
+
+            gt_data = loadmat(self.gt_file)['annot']
+            n_videos = gt_data.shape[1]
+            print('loading gt tubes ...')
+            for i in range(n_videos):
+                video_name = gt_data[0][i][1][0]
+                if video_name in video_testlist:
+                    n_tubes = len(gt_data[0][i][2][0])
+                    v_annotation = {}
+                    all_gt_boxes = []
+                    for j in range(n_tubes):  
+                        gt_one_tube = [] 
+                        tube_start_frame = gt_data[0][i][2][0][j][1][0][0]
+                        tube_end_frame = gt_data[0][i][2][0][j][0][0][0]
+                        tube_class = gt_data[0][i][2][0][j][2][0][0]
+                        tube_data = gt_data[0][i][2][0][j][3]
+                        tube_length = tube_end_frame - tube_start_frame + 1
                     
-            for iter_i, (batch_img_name, batch_video_clip, batch_target) in enumerate(self.testloader):
-                # to device
-                batch_video_clip = batch_video_clip.to(model.device)
+                        for k in range(tube_length):
+                            gt_boxes = []
+                            gt_boxes.append(int(tube_start_frame+k))
+                            gt_boxes.append(float(tube_data[k][0]))
+                            gt_boxes.append(float(tube_data[k][1]))
+                            gt_boxes.append(float(tube_data[k][0]) + float(tube_data[k][2]))
+                            gt_boxes.append(float(tube_data[k][1]) + float(tube_data[k][3]))
+                            gt_one_tube.append(gt_boxes)
+                        all_gt_boxes.append(gt_one_tube)
 
-                with torch.no_grad():
-                    # inference
-                    batch_scores, batch_labels, batch_bboxes = model(batch_video_clip)
+                    v_annotation['gt_classes'] = tube_class
+                    v_annotation['tubes'] = np.array(all_gt_boxes)
+                    gt_videos[video_name] = v_annotation
 
-                    # process batch
-                    for bi in range(len(batch_scores)):
-                        img_name = batch_img_name[bi]
-                        scores = batch_scores[bi]
-                        labels = batch_labels[bi]
-                        bboxes = batch_bboxes[bi]
-                        target = batch_target[bi]
+            # inference
+            print('inference ...')
+            for i, line in enumerate(lines):
+                line = line.rstrip()
+                if i % 50 == 0:
+                    print('Video: [%d / %d] - %s' % (i, len(lines), line))
+                
+                # set video
+                self.testset.set_video_data(line)
 
-                        # rescale bbox
-                        orig_size = target['orig_size']
-                        bboxes = rescale_bboxes(bboxes, orig_size)
+                # dataloader
+                self.testloader = torch.utils.data.DataLoader(
+                    dataset=self.testset, 
+                    batch_size=self.batch_size,
+                    shuffle=False,
+                    collate_fn=self.collate_fn, 
+                    num_workers=4,
+                    drop_last=False,
+                    pin_memory=True
+                    )
+                        
+                for iter_i, (batch_img_name, batch_video_clip, batch_target) in enumerate(self.testloader):
+                    # to device
+                    batch_video_clip = batch_video_clip.to(model.device)
 
-                        img_annotation = {}
-                        for cls_idx in range(self.num_classes):
-                            inds = np.where(labels == cls_idx)[0]
-                            c_bboxes = bboxes[inds]
-                            c_scores = scores[inds]
-                            # [n_box, 5]
-                            boxes = np.concatenate([c_bboxes, c_scores[..., None]], axis=-1)
-                            img_annotation[cls_idx+1] = boxes
-                        detected_boxes[img_name] = img_annotation
+                    with torch.no_grad():
+                        # inference
+                        batch_scores, batch_labels, batch_bboxes = model(batch_video_clip)
 
-            # delete testloader
-            del self.testloader
+                        # process batch
+                        for bi in range(len(batch_scores)):
+                            img_name = batch_img_name[bi]
+                            scores = batch_scores[bi]
+                            labels = batch_labels[bi]
+                            bboxes = batch_bboxes[bi]
+                            target = batch_target[bi]
 
-        iou_list = [0.05, 0.1, 0.2, 0.3, 0.5, 0.75]
-        print('calculating video mAP ...')
-        for iou_th in iou_list:
-            per_ap = evaluate_videoAP(gt_videos, detected_boxes, self.num_classes, iou_th, True)
-            video_mAP = sum(per_ap) / len(per_ap)
-            print('-------------------------------')
-            print('V-mAP @ {} IoU:'.format(iou_th))
-            print('--Per AP: ', per_ap)
-            print('--mAP: ', round(video_mAP, 2))
+                            # rescale bbox
+                            orig_size = target['orig_size']
+                            bboxes = rescale_bboxes(bboxes, orig_size)
+
+                            img_annotation = {}
+                            for cls_idx in range(self.num_classes):
+                                inds = np.where(labels == cls_idx)[0]
+                                c_bboxes = bboxes[inds]
+                                c_scores = scores[inds]
+                                # [n_box, 5]
+                                boxes = np.concatenate([c_bboxes, c_scores[..., None]], axis=-1)
+                                img_annotation[cls_idx+1] = boxes
+                            detected_boxes[img_name] = img_annotation
+
+                # delete testloader
+                del self.testloader
+
+            iou_list = [0.05, 0.1, 0.2, 0.3, 0.5, 0.75]
+            print('calculating video mAP ...')
+            for iou_th in iou_list:
+                per_ap = evaluate_videoAP(gt_videos, detected_boxes, self.num_classes, iou_th, True)
+                video_mAP = sum(per_ap) / len(per_ap)
+                print('-------------------------------')
+                print('V-mAP @ {} IoU:'.format(iou_th))
+                print('--Per AP: ', per_ap)
+                print('--mAP: ', round(video_mAP, 2))
